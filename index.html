@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Smart Study Planner - Daily Schedule & Progress Tracker</title>
+
+  <script>
+    // Authentication Guard: Redirect to Login & Sign In portal if not authenticated
+    if (!sessionStorage.getItem('study_logged_in')) {
+      window.location.replace('login.html');
+    }
+  </script>
+  
+  <!-- Inter Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons for crisp UI -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Canvas Confetti for celebrating completed milestones -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Stylesheet with cache-busting -->
+  <link rel="stylesheet" href="styles.css?v=2.2">
+</head>
+<body>
+  <!-- ==================== LOGIN & SIGN IN AUTHENTICATION PORTAL ==================== -->
+  <div id="authScreen" class="auth-screen">
+    <!-- Decorative Glowing Blobs -->
+    <div class="auth-bg-blob auth-bg-blob-1"></div>
+    <div class="auth-bg-blob auth-bg-blob-2"></div>
+    <div class="auth-bg-blob auth-bg-blob-3"></div>
+
+    <div class="auth-card-wrapper">
+      <!-- Left Hero Banner -->
+      <div class="auth-hero-side">
+        <div>
+          <div class="auth-hero-header">
+            <div class="auth-hero-logo">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div>
+              <h3 style="font-weight: 800; font-size: 1.15rem; color: var(--text-main); line-height: 1.2;">Smart Study Planner</h3>
+              <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Personalized Exam Mastery Engine</span>
+            </div>
+          </div>
+
+          <h1 class="auth-hero-title">Plan smarter. Study deeper. Ace your exams.</h1>
+          <p class="auth-hero-subtitle">
+            Enter your subjects and exam dates. We intelligently balance your syllabus into daily study sessions with spaced revision buffers and progress analytics.
+          </p>
+
+          <div class="auth-feature-list">
+            <div class="auth-feature-item">
+              <div class="auth-feature-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--primary);">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <span>Intelligent Daily Schedule & Hourly Timetable</span>
+            </div>
+            <div class="auth-feature-item">
+              <div class="auth-feature-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <span>Pre-Exam Mock & Buffer Revision Safeguards</span>
+            </div>
+            <div class="auth-feature-item">
+              <div class="auth-feature-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--secondary);">
+                <i class="fa-solid fa-stopwatch"></i>
+              </div>
+              <span>Built-in Pomodoro Focus Timer with Logs</span>
+            </div>
+            <div class="auth-feature-item">
+              <div class="auth-feature-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                <i class="fa-solid fa-chart-pie"></i>
+              </div>
+              <span>Visual Readiness & Progress Percentage Analytics</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border-light); padding-top: 1rem;">
+          <i class="fa-solid fa-lock" style="margin-right: 0.35rem;"></i> Local & Private • Your study data remains secured in your browser
+        </div>
+      </div>
+
+      <!-- Right Form Side -->
+      <div class="auth-form-side">
+        <!-- Auth Tabs: Sign In / Create Account -->
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab-btn active" id="btnAuthTabSignIn" onclick="switchAuthTab('signin')">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+          </button>
+          <button type="button" class="auth-tab-btn" id="btnAuthTabSignUp" onclick="switchAuthTab('signup')">
+            <i class="fa-solid fa-user-plus"></i> Create Account
+          </button>
+        </div>
+
+        <!-- Notification Banner inside Auth -->
+        <div id="authAlertBanner" style="display: none; padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.825rem; font-weight: 500; margin-bottom: 1.25rem;"></div>
+
+        <!-- 1. SIGN IN FORM -->
+        <form id="formSignIn" onsubmit="handleSignInSubmit(event)">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="signinEmail">Student Email</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-envelope auth-input-icon"></i>
+              <input type="email" id="signinEmail" class="auth-input" placeholder="alex@study.io" required>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label class="form-label" for="signinPassword">Password</label>
+              <a href="#" onclick="alert('Password reset link sent to your registered email!'); return false;" style="font-size: 0.75rem; color: var(--primary); text-decoration: none; font-weight: 600;">Forgot Password?</a>
+            </div>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-lock auth-input-icon"></i>
+              <input type="password" id="signinPassword" class="auth-input" placeholder="••••••••" required>
+              <button type="button" class="auth-password-toggle" onclick="togglePasswordVisibility('signinPassword', this)">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.825rem; color: var(--text-secondary); cursor: pointer;">
+              <input type="checkbox" id="signinRemember" checked style="accent-color: var(--primary);"> Remember me
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btnSignInSubmit" style="width: 100%; padding: 0.8rem; font-size: 0.95rem;">
+            <span>Sign In to Study Planner</span> <i class="fa-solid fa-arrow-right"></i>
+          </button>
+
+          <div class="auth-divider">
+            <span>or instant test</span>
+          </div>
+
+          <!-- One-Click Instant Demo Login Button -->
+          <button type="button" class="btn-demo-login" id="btnQuickDemoLogin" onclick="handleDemoLogin()">
+            <i class="fa-solid fa-bolt"></i> 1-Click Demo Student Sign In
+          </button>
+
+          <button type="button" class="btn-google" style="margin-top: 0.65rem;" onclick="handleGoogleMockLogin()">
+            <i class="fa-brands fa-google" style="color: #ea4335;"></i> Continue with Google
+          </button>
+        </form>
+
+        <!-- 2. SIGN UP / CREATE ACCOUNT FORM -->
+        <form id="formSignUp" style="display: none;" onsubmit="handleSignUpSubmit(event)">
+          <div class="form-group" style="margin-bottom: 0.85rem;">
+            <label class="form-label" for="signupName">Full Name</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-user auth-input-icon"></i>
+              <input type="text" id="signupName" class="auth-input" placeholder="Alex Chen" required>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.85rem;">
+            <label class="form-label" for="signupEmail">Email Address</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-envelope auth-input-icon"></i>
+              <input type="email" id="signupEmail" class="auth-input" placeholder="alex@study.io" required>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.85rem;">
+            <label class="form-label" for="signupGoal">Current Exam / Academic Target</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-bullseye auth-input-icon"></i>
+              <select id="signupGoal" class="auth-input" style="padding-left: 2.6rem;">
+                <option value="University Semester Finals & Midterms">University Semester Finals & Midterms</option>
+                <option value="Medical School / MCAT Prep">Medical School / MCAT Prep</option>
+                <option value="Engineering & Computer Science Finals">Engineering & Computer Science Finals</option>
+                <option value="High School Board / AP Exams">High School Board / AP Exams</option>
+                <option value="Law School / Bar / LSAT">Law School / Bar / LSAT</option>
+                <option value="General Professional Certification">General Professional Certification</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="signupPassword">Create Password</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-lock auth-input-icon"></i>
+              <input type="password" id="signupPassword" class="auth-input" placeholder="At least 6 characters" minlength="6" oninput="checkPasswordStrength(this.value)" required>
+              <button type="button" class="auth-password-toggle" onclick="togglePasswordVisibility('signupPassword', this)">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+            <!-- Password Strength Bar -->
+            <div class="password-strength-container">
+              <div class="strength-bar" id="strengthBar1"></div>
+              <div class="strength-bar" id="strengthBar2"></div>
+              <div class="strength-bar" id="strengthBar3"></div>
+            </div>
+            <span id="strengthText" style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 0.2rem;">Strength: min 6 chars</span>
+          </div>
+
+          <button type="submit" class="btn btn-accent" id="btnSignUpSubmit" style="width: 100%; padding: 0.8rem; font-size: 0.95rem;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Create Account & Launch Planner
+          </button>
+
+          <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 1rem;">
+            By signing up, your study schedules and topics are saved securely on your device.
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CINEMATIC POST-LOGIN ANIMATION OVERLAY ==================== -->
+  <div id="loginSuccessOverlay" class="login-success-overlay">
+    <div class="success-portal-container">
+      <!-- Orbiting Rings & Glow Sphere -->
+      <div class="orbit-system">
+        <div class="orbit-ring orbit-ring-1"></div>
+        <div class="orbit-ring orbit-ring-2"></div>
+        <div class="success-sphere">
+          <i class="fa-solid fa-check"></i>
+        </div>
+      </div>
+
+      <!-- Welcome Messaging -->
+      <h2 class="login-success-title" id="loginSuccessHeading">Welcome Back!</h2>
+      <p class="login-success-subtitle" id="loginSuccessMessage">
+        Calibrating your exam dates, daily timetable, and topic progress...
+      </p>
+
+      <!-- Smooth Progress Loader Bar -->
+      <div class="login-loader-container">
+        <div class="login-loader-bar" id="loginLoaderBar"></div>
+      </div>
+      <div class="login-loader-status" id="loginLoaderStatus">Synchronizing study sessions (100%)...</div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN APPLICATION CONTAINER ==================== -->
+  <div class="app-container" id="appContainer" style="display: none;">
+    <!-- Navigation Bar -->
+    <header class="navbar">
+      <a href="#" class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div>
+          <span>Smart Study Planner</span>
+          <div style="font-size: 0.68rem; font-weight: 500; color: var(--text-muted); line-height: 1;">AI-Powered Schedule Engine</div>
+        </div>
+      </a>
+
+      <!-- Center Tabs -->
+      <nav class="nav-tabs">
+        <button class="nav-tab-btn active" data-tab="dashboard">
+          <i class="fa-solid fa-gauge-high"></i> Dashboard
+        </button>
+        <button class="nav-tab-btn" data-tab="schedule">
+          <i class="fa-solid fa-calendar-days"></i> Daily Schedule
+        </button>
+        <button class="nav-tab-btn" data-tab="subjects">
+          <i class="fa-solid fa-book-bookmark"></i> Subjects & Topics
+        </button>
+        <button class="nav-tab-btn" data-tab="timer">
+          <i class="fa-solid fa-stopwatch"></i> Focus Timer
+        </button>
+        <button class="nav-tab-btn" data-tab="analytics">
+          <i class="fa-solid fa-chart-pie"></i> Analytics
+        </button>
+      </nav>
+
+      <!-- Right Header Actions -->
+      <div class="nav-actions">
+        <button id="btnGenerateSchedule" class="btn btn-accent" title="Generate or Rebalance Daily Schedule">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Schedule
+        </button>
+        <button id="btnOpenAddSubject" class="btn btn-primary">
+          <i class="fa-solid fa-plus"></i> New Subject
+        </button>
+        <button id="btnSettings" class="btn btn-secondary btn-icon" title="Study Settings">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+        <button id="btnToggleTheme" class="btn btn-secondary btn-icon" title="Toggle Dark/Light Mode">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <button onclick="handleLogout()" class="btn btn-secondary btn-icon" title="Sign Out & Return to Login Screen" style="color: var(--danger);">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
+
+        <!-- User Profile Menu -->
+        <div class="user-profile-menu">
+          <div class="user-profile-btn" id="userProfileBtn" onclick="toggleUserDropdown(event)">
+            <div class="user-avatar" id="navUserAvatar">AC</div>
+            <span class="user-nav-name" id="navUserName">Alex Chen</span>
+            <i class="fa-solid fa-chevron-down" style="font-size: 0.65rem; color: var(--text-muted);"></i>
+          </div>
+          <div class="user-dropdown-card" id="userDropdownCard">
+            <div class="user-dropdown-header">
+              <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);" id="dropdownFullName">Alex Chen</div>
+              <div class="user-dropdown-email" id="dropdownEmail">alex@study.io</div>
+              <span class="subject-badge" style="background: var(--primary); font-size: 0.68rem; margin-top: 0.35rem;" id="dropdownGoal">University Finals</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="openSettingsModal(); closeUserDropdown();" style="width: 100%; justify-content: flex-start;">
+              <i class="fa-solid fa-gear"></i> Study Planner Settings
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleTheme();" style="width: 100%; justify-content: flex-start;">
+              <i class="fa-solid fa-circle-half-stroke"></i> Toggle Light/Dark Theme
+            </button>
+            <div style="border-top: 1px solid var(--border-light); padding-top: 0.5rem; margin-top: 0.25rem;">
+              <button class="btn btn-secondary btn-sm" onclick="handleLogout()" style="width: 100%; justify-content: flex-start; color: var(--danger);">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top Metrics Banner -->
+    <section class="metrics-banner">
+      <!-- Overall Progress -->
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--primary);">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <div class="metric-info">
+          <span class="metric-label">Overall Progress</span>
+          <span id="metricProgressPercent" class="metric-value">0%</span>
+        </div>
+      </div>
+
+      <!-- Topics Completed -->
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="metric-info">
+          <span class="metric-label">Topics Finished</span>
+          <span id="metricTopicsRatio" class="metric-value">0 / 0</span>
+        </div>
+      </div>
+
+      <!-- Next Exam Countdown -->
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+          <i class="fa-solid fa-hourglass-half"></i>
+        </div>
+        <div class="metric-info">
+          <span class="metric-label">Next Exam In</span>
+          <span id="metricNextExam" class="metric-value">--</span>
+        </div>
+      </div>
+
+      <!-- Today's Daily Target -->
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--secondary);">
+          <i class="fa-solid fa-bullseye"></i>
+        </div>
+        <div class="metric-info">
+          <span class="metric-label">Today's Goals</span>
+          <span id="metricTodayGoals" class="metric-value">0 / 0</span>
+        </div>
+      </div>
+
+      <!-- Study Streak -->
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--danger);">
+          <i class="fa-solid fa-fire"></i>
+        </div>
+        <div class="metric-info">
+          <span class="metric-label">Study Streak</span>
+          <span id="metricStreak" class="metric-value">1 Day 🔥</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Tabs -->
+    <main class="main-content">
+      <!-- 1. DASHBOARD TAB -->
+      <div id="tab-dashboard" class="tab-pane active">
+        <div class="dashboard-layout">
+          <!-- Left Main Column -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Today's Study Agenda Card -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <i class="fa-solid fa-list-check" style="color: var(--primary);"></i>
+                  <span>Today's Study Agenda</span>
+                  <span id="todayDateBadge" style="font-size: 0.75rem; font-weight: 500; color: var(--text-muted); margin-left: 0.5rem;"></span>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button id="btnQuickPomodoro" class="btn btn-secondary btn-sm">
+                    <i class="fa-solid fa-play"></i> Start Focus
+                  </button>
+                  <button id="btnRebalanceToday" class="btn btn-secondary btn-sm" title="Rebalance Schedule">
+                    <i class="fa-solid fa-rotate"></i> Rebalance
+                  </button>
+                </div>
+              </div>
+              <div id="todayTaskList">
+                <!-- Dynamically populated or empty state -->
+              </div>
+            </div>
+
+            <!-- Subject Progress Overview Cards -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <i class="fa-solid fa-book-open-reader" style="color: var(--secondary);"></i>
+                  <span>Subject Masteries & Completion</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="switchTab('subjects')">
+                  Manage Subjects <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+              <div id="dashboardSubjectCards" class="grid-cards">
+                <!-- Subject progress cards populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Sidebar Column -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Overall Progress Gauge Card -->
+            <div class="card" style="text-align: center;">
+              <div class="card-header">
+                <div class="card-title">
+                  <i class="fa-solid fa-bullseye" style="color: var(--success);"></i>
+                  <span>Total Preparedness</span>
+                </div>
+                <span id="examReadinessBadge" class="badge-safe exam-countdown-badge">On Track</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; padding: 1rem 0;">
+                <div class="progress-ring-container">
+                  <svg width="140" height="140">
+                    <circle stroke="var(--border-light)" stroke-width="12" fill="transparent" r="58" cx="70" cy="70" />
+                    <circle id="overallProgressRing" class="progress-ring-circle" stroke="url(#progressGradient)" stroke-width="12" stroke-linecap="round" fill="transparent" r="58" cx="70" cy="70" stroke-dasharray="364.4" stroke-dashoffset="364.4" />
+                    <defs>
+                      <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#6366f1" />
+                        <stop offset="100%" stop-color="#10b981" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div class="progress-ring-center">
+                    <span id="overallPercentageBig" class="progress-ring-percentage">0%</span>
+                    <span class="progress-ring-subtext">Completed</span>
+                  </div>
+                </div>
+                <p id="overallProgressSummary" style="font-size: 0.825rem; color: var(--text-secondary); margin-top: 0.85rem; max-width: 250px;">
+                  0 of 0 topics completed. Keep going!
+                </p>
+              </div>
+            </div>
+
+            <!-- Exam Countdown Timeline -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <i class="fa-regular fa-clock" style="color: var(--warning);"></i>
+                  <span>Upcoming Exams</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="openAddSubjectModal()">
+                  + Add
+                </button>
+              </div>
+              <div id="upcomingExamsList">
+                <!-- Exam cards populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Quick Study Tips -->
+            <div class="card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(6, 182, 212, 0.08));">
+              <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--primary);">
+                <i class="fa-regular fa-lightbulb"></i> Study Tip of the Day
+              </div>
+              <p id="dailyTipText" style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.45;">
+                <strong>Interleaving practice:</strong> Switching between 2-3 different subjects each day rather than cramming one subject retains up to 40% more information long-term.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. DAILY SCHEDULE TAB -->
+      <div id="tab-schedule" class="tab-pane">
+        <!-- Plan Strategy & Roadmap Hero Banner -->
+        <div id="planHeroBanner" class="plan-hero-banner">
+          <div class="plan-hero-header">
+            <div>
+              <div class="plan-hero-title">
+                <i class="fa-solid fa-graduation-cap" style="color: var(--primary);"></i>
+                <span id="planHeroTitleText">Active Master Study Plan</span>
+                <span class="exam-countdown-badge badge-safe" style="font-size: 0.75rem;">Optimized & Balanced</span>
+              </div>
+              <div class="plan-pills" id="planHeroPills">
+                <!-- Dynamically populated stats -->
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn btn-primary btn-sm" onclick="openPlanGeneratorModal()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Customize Plan
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btnExportICS" title="Export schedule as .ics file for Google Calendar, Apple Calendar, or Outlook">
+                <i class="fa-solid fa-calendar-plus"></i> Export to Calendar (.ics)
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btnPrintSchedule" title="Print or save as PDF">
+                <i class="fa-solid fa-print"></i> Print / PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- 3-Phase Roadmap -->
+          <div class="roadmap-phases" id="planHeroRoadmap">
+            <!-- Phase 1, Phase 2, Phase 3 populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Schedule Main Card -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem;">
+            <!-- View Switcher -->
+            <div class="schedule-view-switcher">
+              <button class="schedule-view-btn active" id="btnViewTimeline" onclick="setScheduleView('timeline')">
+                <i class="fa-solid fa-list-ul"></i> Daily Timetable
+              </button>
+              <button class="schedule-view-btn" id="btnViewWeekly" onclick="setScheduleView('weekly')">
+                <i class="fa-solid fa-calendar-week"></i> Weekly Grid
+              </button>
+              <button class="schedule-view-btn" id="btnViewRoadmap" onclick="setScheduleView('roadmap')">
+                <i class="fa-solid fa-route"></i> Master Roadmap
+              </button>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-left: auto;">
+              <select id="scheduleSubjectFilter" class="form-select" style="width: auto; padding: 0.35rem 0.75rem; font-size: 0.825rem;">
+                <option value="all">All Subjects</option>
+              </select>
+              <button id="btnRebalanceFull" class="btn btn-secondary btn-sm" title="Rebalance if behind schedule">
+                <i class="fa-solid fa-rotate"></i> Quick Rebalance
+              </button>
+            </div>
+          </div>
+
+          <!-- 1. Day-by-Day Timeline View -->
+          <div id="scheduleTimelineContainer">
+            <!-- Timeline days rendered here -->
+          </div>
+
+          <!-- 2. Weekly Calendar Grid View -->
+          <div id="scheduleWeeklyContainer" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <button class="btn btn-secondary btn-sm btn-icon" onclick="changeWeeklyOffset(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                <span id="weeklyGridRangeLabel" style="font-weight: 700; font-size: 0.95rem;">This Week</span>
+                <button class="btn btn-secondary btn-sm btn-icon" onclick="changeWeeklyOffset(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                <button class="btn btn-secondary btn-sm" onclick="changeWeeklyOffset(0)">Today</button>
+              </div>
+              <span style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-solid fa-circle-info"></i> Color indicates course subject</span>
+            </div>
+            <div class="weekly-grid-wrapper">
+              <div id="weeklyGrid" class="weekly-grid">
+                <!-- 7 day columns rendered here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Master Plan Roadmap View -->
+          <div id="scheduleRoadmapContainer" style="display: none;">
+            <div id="roadmapContent">
+              <!-- Roadmap milestones rendered here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. SUBJECTS & TOPICS TAB -->
+      <div id="tab-subjects" class="tab-pane">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--text-main);">Subjects & Topics Management</h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Add your exam dates and outline all chapters or topics to track your progress.</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="openBulkTopicsModal()">
+              <i class="fa-solid fa-file-import"></i> Bulk Add Topics
+            </button>
+            <button class="btn btn-primary" onclick="openAddSubjectModal()">
+              <i class="fa-solid fa-plus"></i> Add Subject
+            </button>
+          </div>
+        </div>
+
+        <div id="subjectsCardsContainer" class="grid-cards">
+          <!-- Populated dynamically with full subject cards & topic lists -->
+        </div>
+      </div>
+
+      <!-- 4. FOCUS TIMER (POMODORO) TAB -->
+      <div id="tab-timer" class="tab-pane">
+        <div class="card" style="max-width: 680px; margin: 0 auto;">
+          <div class="pomodoro-container">
+            <div class="timer-mode-selector">
+              <button class="timer-mode-btn active" data-mode="pomodoro">Pomodoro (25m)</button>
+              <button class="timer-mode-btn" data-mode="shortBreak">Short Break (5m)</button>
+              <button class="timer-mode-btn" data-mode="longBreak">Long Break (15m)</button>
+              <button class="timer-mode-btn" data-mode="deepWork">Deep Work (50m)</button>
+            </div>
+
+            <!-- Current Topic Selector -->
+            <div style="margin-bottom: 1.5rem; width: 100%; max-width: 420px;">
+              <label class="form-label" style="text-align: left; display: block; margin-bottom: 0.35rem;">Currently Studying Topic:</label>
+              <select id="timerTopicSelect" class="form-select">
+                <option value="">-- General Study Session --</option>
+              </select>
+            </div>
+
+            <!-- Time Display -->
+            <div id="timerDisplay" class="timer-display">25:00</div>
+
+            <div id="timerTopicPill" class="timer-topic-pill">
+              <i class="fa-solid fa-bullseye"></i> <span id="timerCurrentTopicName">Ready to focus!</span>
+            </div>
+
+            <!-- Controls -->
+            <div class="timer-controls">
+              <button id="btnTimerReset" class="btn btn-secondary btn-icon" title="Reset Timer">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+              <button id="btnTimerToggle" class="timer-btn-main" title="Start / Pause">
+                <i class="fa-solid fa-play" id="timerIcon"></i>
+              </button>
+              <button id="btnTimerSound" class="btn btn-secondary btn-icon" title="Sound Notification Toggle">
+                <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+              </button>
+            </div>
+
+            <!-- Pomodoro Stats Summary -->
+            <div style="display: flex; gap: 2rem; margin-top: 2.5rem; border-top: 1px solid var(--border-light); padding-top: 1.5rem; width: 100%; justify-content: center;">
+              <div>
+                <div style="font-size: 1.35rem; font-weight: 700; color: var(--primary);" id="pomodoroCompletedCount">0</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Completed Focus Sessions</div>
+              </div>
+              <div style="border-left: 1px solid var(--border-light); padding-left: 2rem;">
+                <div style="font-size: 1.35rem; font-weight: 700; color: var(--secondary);" id="pomodoroMinutesTotal">0 min</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Time Logged</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. ANALYTICS & INSIGHTS TAB -->
+      <div id="tab-analytics" class="tab-pane">
+        <div class="grid-2" style="margin-bottom: 1.5rem;">
+          <!-- Chart 1: Subject Progress Breakdown -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fa-solid fa-chart-column" style="color: var(--primary);"></i>
+                <span>Progress Percentage by Subject</span>
+              </div>
+            </div>
+            <div style="height: 300px; position: relative;">
+              <canvas id="chartSubjectProgress"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Topic Status Distribution -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fa-solid fa-chart-pie" style="color: var(--secondary);"></i>
+                <span>Topic Completion Distribution</span>
+              </div>
+            </div>
+            <div style="height: 300px; position: relative;">
+              <canvas id="chartTopicStatus"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estimated vs Actual Study Hours -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-clock-rotate-left" style="color: var(--accent);"></i>
+              <span>Study Hours Allocation & Estimation</span>
+            </div>
+          </div>
+          <div style="height: 300px; position: relative;">
+            <canvas id="chartStudyHours"></canvas>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 1.5rem; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-color); margin-top: auto;">
+      Smart Study Planner &bull; Dynamic daily schedules, exam countdowns & topic tracking &bull; Data stored securely in your browser.
+    </footer>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. Add / Edit Subject Modal -->
+  <div id="modalSubject" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalSubjectTitle" class="modal-title">Add New Subject</h3>
+        <button class="btn btn-secondary btn-icon btn-sm" onclick="closeModal('modalSubject')">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="formSubject">
+        <div class="modal-body">
+          <input type="hidden" id="subjectId">
+          <div class="form-group">
+            <label class="form-label" for="subjectName">Subject Name *</label>
+            <input type="text" id="subjectName" class="form-input" placeholder="e.g. Mathematics, Organic Chemistry, World History" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="subjectExamDate">Exam Date & Time *</label>
+              <input type="datetime-local" id="subjectExamDate" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="subjectTargetGrade">Target Grade / Goal</label>
+              <input type="text" id="subjectTargetGrade" class="form-input" placeholder="e.g. A+, 95%, 4.0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Theme Color</label>
+            <div class="color-picker-group" id="subjectColorOptions">
+              <div class="color-swatch selected" data-color="#6366f1" style="background: #6366f1;"></div>
+              <div class="color-swatch" data-color="#06b6d4" style="background: #06b6d4;"></div>
+              <div class="color-swatch" data-color="#10b981" style="background: #10b981;"></div>
+              <div class="color-swatch" data-color="#f59e0b" style="background: #f59e0b;"></div>
+              <div class="color-swatch" data-color="#ec4899" style="background: #ec4899;"></div>
+              <div class="color-swatch" data-color="#8b5cf6" style="background: #8b5cf6;"></div>
+              <div class="color-swatch" data-color="#ef4444" style="background: #ef4444;"></div>
+              <div class="color-swatch" data-color="#14b8a6" style="background: #14b8a6;"></div>
+            </div>
+            <input type="hidden" id="subjectColor" value="#6366f1">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="subjectInitialTopics">Initial Topics / Chapters (Optional, one per line)</label>
+            <textarea id="subjectInitialTopics" class="form-textarea" rows="3" placeholder="Chapter 1: Foundations&#10;Chapter 2: Core Concepts&#10;Chapter 3: Advanced Applications"></textarea>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">You can also add, edit or bulk paste topics later anytime.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalSubject')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Subject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Add / Edit Topic Modal -->
+  <div id="modalTopic" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTopicTitle" class="modal-title">Add Topic</h3>
+        <button class="btn btn-secondary btn-icon btn-sm" onclick="closeModal('modalTopic')">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="formTopic">
+        <div class="modal-body">
+          <input type="hidden" id="topicId">
+          <div class="form-group">
+            <label class="form-label" for="topicSubjectSelect">Subject *</label>
+            <select id="topicSubjectSelect" class="form-select" required>
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="topicTitle">Topic / Chapter Title *</label>
+            <input type="text" id="topicTitle" class="form-input" placeholder="e.g. Limits & Continuity, Chemical Bonding" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="topicEstHours">Estimated Hours</label>
+              <input type="number" id="topicEstHours" class="form-input" value="1.5" min="0.25" max="24" step="0.25" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="topicDifficulty">Difficulty Level</label>
+              <select id="topicDifficulty" class="form-select">
+                <option value="easy">Easy (0.8x Effort)</option>
+                <option value="medium" selected>Medium (1.0x Effort)</option>
+                <option value="hard">Hard (1.3x Effort)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="topicPriority">Priority</label>
+              <select id="topicPriority" class="form-select">
+                <option value="normal" selected>Normal</option>
+                <option value="high">High (Study First)</option>
+                <option value="low">Low (Supplemental)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="topicStatus">Current Status</label>
+              <select id="topicStatus" class="form-select">
+                <option value="not_started">Not Started</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="needs_revision">Needs Revision</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="topicNotes">Notes / Key Formulas (Optional)</label>
+            <textarea id="topicNotes" class="form-textarea" rows="2" placeholder="Important formulas, page numbers, revision tips..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalTopic')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Topic</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Bulk Add Topics Modal -->
+  <div id="modalBulkTopics" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-file-import" style="color: var(--primary);"></i> Bulk Import Topics</h3>
+        <button class="btn btn-secondary btn-icon btn-sm" onclick="closeModal('modalBulkTopics')">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="formBulkTopics">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="bulkSubjectSelect">Assign to Subject *</label>
+            <select id="bulkSubjectSelect" class="form-select" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="bulkTopicsText">Paste Topics / Chapters (One per line) *</label>
+            <textarea id="bulkTopicsText" class="form-textarea" rows="8" placeholder="Chapter 1: Introduction&#10;Chapter 2: Kinetics&#10;Chapter 3: Thermodynamics&#10;Chapter 4: Equilibrium" required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="bulkDefaultHours">Default Est. Hours Per Topic</label>
+              <input type="number" id="bulkDefaultHours" class="form-input" value="1.5" min="0.5" max="10" step="0.5">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="bulkDefaultDiff">Default Difficulty</label>
+              <select id="bulkDefaultDiff" class="form-select">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalBulkTopics')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Import All Topics</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Study Plan & Schedule Generator Wizard Modal -->
+  <div id="modalPlanGenerator" class="modal-overlay">
+    <div class="modal" style="max-width: 640px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary);"></i>
+          Smart Study Plan Generator
+        </h3>
+        <button class="btn btn-secondary btn-icon btn-sm" onclick="closeModal('modalPlanGenerator')">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="formPlanGenerator">
+        <div class="modal-body">
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">
+            Configure your study preferences below. Our algorithm calculates exam proximity, topic difficulty, and interleaving to generate an actual day-by-day timetable and roadmap.
+          </p>
+
+          <!-- 1. Intensity Selection -->
+          <div class="form-group">
+            <label class="form-label">1. Choose Study Intensity</label>
+            <div class="intensity-grid" id="planIntensityOptions">
+              <div class="intensity-card" data-intensity="steady" data-hours="2.0">
+                <div class="intensity-icon">☕</div>
+                <div class="intensity-title">Steady & Light</div>
+                <div class="intensity-hours">2.0 hrs / day</div>
+                <div class="intensity-desc">Relaxed pace, best for long-term consistency</div>
+              </div>
+              <div class="intensity-card selected" data-intensity="balanced" data-hours="3.5">
+                <div class="intensity-icon">⚖️</div>
+                <div class="intensity-title">Balanced Mastery</div>
+                <div class="intensity-hours">3.5 hrs / day</div>
+                <div class="intensity-desc">Recommended for optimal memory retention</div>
+              </div>
+              <div class="intensity-card" data-intensity="intensive" data-hours="5.5">
+                <div class="intensity-icon">🚀</div>
+                <div class="intensity-title">Intensive Cram</div>
+                <div class="intensity-hours">5.5 hrs / day</div>
+                <div class="intensity-desc">Accelerated coverage for imminent exams</div>
+              </div>
+            </div>
+            <input type="hidden" id="planDailyHoursInput" value="3.5">
+          </div>
+
+          <!-- 2. Daily Time Window -->
+          <div class="form-group">
+            <label class="form-label">2. Preferred Daily Study Window</label>
+            <div class="timeslot-grid" id="planTimeWindowOptions">
+              <div class="timeslot-card selected" data-window="morning" data-start="08:30">
+                <div class="timeslot-title">🌅 Morning Bird</div>
+                <div class="timeslot-time">08:30 AM - 12:30 PM</div>
+              </div>
+              <div class="timeslot-card" data-window="afternoon" data-start="13:30">
+                <div class="timeslot-title">☀️ Afternoon</div>
+                <div class="timeslot-time">01:30 PM - 05:30 PM</div>
+              </div>
+              <div class="timeslot-card" data-window="evening" data-start="18:00">
+                <div class="timeslot-title">🌙 Night Owl</div>
+                <div class="timeslot-time">06:00 PM - 10:00 PM</div>
+              </div>
+            </div>
+            <input type="hidden" id="planStartTimeInput" value="08:30">
+          </div>
+
+          <!-- 3. Start Date & Buffer -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="planStartDate">Start Schedule From</label>
+              <input type="date" id="planStartDate" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="planRevisionBuffer">Pre-Exam Mock/Revision Days</label>
+              <select id="planRevisionBuffer" class="form-select">
+                <option value="1">1 Day Buffer before each exam</option>
+                <option value="2" selected>2 Days Buffer (Recommended)</option>
+                <option value="3">3 Days Buffer (Intensive review)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 4. Study Days Checkboxes -->
+          <div class="form-group">
+            <label class="form-label">Study Days Per Week</label>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 0.25rem;">
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="planDayMon" checked> Mon</label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="planDayTue" checked> Tue</label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="planDayWed" checked> Wed</label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="planDayThu" checked> Thu</label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="planDayFri" checked> Fri</label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="planDaySat" checked> Sat</label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="planDaySun"> Sun (Rest)</label>
+            </div>
+          </div>
+
+          <!-- Plan Projection Preview Box -->
+          <div id="planProjectionBox" style="background: var(--border-light); border-radius: var(--radius-md); padding: 0.75rem 1rem; border-left: 4px solid var(--primary); font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;">
+            <!-- Real-time calculation message -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalPlanGenerator')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitPlanGenerator">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Generate & View Study Plan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Planner Settings Modal -->
+  <div id="modalSettings" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-gear" style="color: var(--primary);"></i> Study Schedule Settings</h3>
+        <button class="btn btn-secondary btn-icon btn-sm" onclick="closeModal('modalSettings')">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="formSettings">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="settingDailyHours">Daily Available Study Time (Hours)</label>
+            <input type="number" id="settingDailyHours" class="form-input" value="3.5" min="0.5" max="16" step="0.5" required>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">How many hours you can realistically study each day.</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="settingSessionLength">Preferred Focus Block Length</label>
+            <select id="settingSessionLength" class="form-select">
+              <option value="25">25 minutes (Standard Pomodoro)</option>
+              <option value="45" selected>45 minutes (School / University block)</option>
+              <option value="60">60 minutes (Deep 1-Hour block)</option>
+              <option value="90">90 minutes (Ultradian Rhythm)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Study Days Per Week</label>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 0.25rem;">
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="dayMon" checked> Mon</label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="dayTue" checked> Tue</label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="dayWed" checked> Wed</label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="dayThu" checked> Thu</label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="dayFri" checked> Fri</label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="daySat" checked> Sat</label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.825rem;"><input type="checkbox" id="daySun"> Sun (Rest)</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="settingRevisionBuffer">Pre-Exam Revision Buffer</label>
+            <select id="settingRevisionBuffer" class="form-select">
+              <option value="1">1 Day before Exam (Final Review)</option>
+              <option value="2" selected>2 Days before Exam (Intensive Revision & Mocks)</option>
+              <option value="3">3 Days before Exam (Extended Review Window)</option>
+            </select>
+          </div>
+
+          <div style="border-top: 1px solid var(--border-light); padding-top: 1rem; margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" id="btnLoadDemoData" class="btn btn-secondary btn-sm">
+              <i class="fa-solid fa-cloud-arrow-down"></i> Load Demo Subjects
+            </button>
+            <button type="button" id="btnResetAllData" class="btn btn-secondary btn-sm" style="color: var(--danger);">
+              <i class="fa-solid fa-trash"></i> Reset All Data
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalSettings')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Main Application Logic Script with cache busting -->
+  <script src="app.js?v=2.2"></script>
+</body>
+</html>

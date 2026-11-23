@@ -1,0 +1,17 @@
+{
+  "name": "smart-study-planner",
+  "version": "1.0.0",
+  "description": "Smart Study Planner with daily schedule generation, topic tracking, and progress percentage.",
+  "scripts": {
+    "start": "python server.py",
+    "cli": "python planner.py"
+  },
+  "keywords": [
+    "study-planner",
+    "schedule-generator",
+    "pomodoro",
+    "progress-tracker"
+  ],
+  "author": "",
+  "license": "MIT"
+}

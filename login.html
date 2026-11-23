@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Login & Sign In - Smart Study Planner</title>
+  
+  <!-- Inter Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons for crisp UI -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Canvas Confetti for celebrating login unlock -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css?v=2.1">
+</head>
+<body style="background: var(--bg-main); margin: 0; padding: 0; min-height: 100vh;">
+
+  <!-- ==================== AUTHENTICATION PORTAL ==================== -->
+  <div id="authScreen" class="auth-screen">
+    <!-- Decorative Glowing Blobs -->
+    <div class="auth-bg-blob auth-bg-blob-1"></div>
+    <div class="auth-bg-blob auth-bg-blob-2"></div>
+    <div class="auth-bg-blob auth-bg-blob-3"></div>
+
+    <div class="auth-card-wrapper">
+      <!-- Left Hero Banner -->
+      <div class="auth-hero-side">
+        <div>
+          <div class="auth-hero-header">
+            <div class="auth-hero-logo">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div>
+              <h3 style="font-weight: 800; font-size: 1.15rem; color: var(--text-main); line-height: 1.2;">Smart Study Planner</h3>
+              <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Personalized Exam Mastery Engine</span>
+            </div>
+          </div>
+
+          <h1 class="auth-hero-title">Plan smarter. Study deeper. Ace your exams.</h1>
+          <p class="auth-hero-subtitle">
+            Enter your subjects and exam dates. We intelligently balance your syllabus into daily study sessions with spaced revision buffers and progress analytics.
+          </p>
+
+          <div class="auth-feature-list">
+            <div class="auth-feature-item">
+              <div class="auth-feature-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--primary);">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <span>Intelligent Daily Schedule & Hourly Timetable</span>
+            </div>
+            <div class="auth-feature-item">
+              <div class="auth-feature-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <span>Pre-Exam Mock & Buffer Revision Safeguards</span>
+            </div>
+            <div class="auth-feature-item">
+              <div class="auth-feature-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--secondary);">
+                <i class="fa-solid fa-stopwatch"></i>
+              </div>
+              <span>Built-in Pomodoro Focus Timer with Logs</span>
+            </div>
+            <div class="auth-feature-item">
+              <div class="auth-feature-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                <i class="fa-solid fa-chart-pie"></i>
+              </div>
+              <span>Visual Readiness & Progress Percentage Analytics</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border-light); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span><i class="fa-solid fa-lock"></i> Private & Secured on your device</span>
+          <a href="index.html" onclick="sessionStorage.setItem('study_logged_in', 'guest');" style="color: var(--primary); text-decoration: none; font-weight: 600;">Skip to Dashboard &rarr;</a>
+        </div>
+      </div>
+
+      <!-- Right Form Side -->
+      <div class="auth-form-side">
+        <!-- Auth Tabs: Sign In / Create Account -->
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab-btn active" id="btnAuthTabSignIn" onclick="switchTab('signin')">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+          </button>
+          <button type="button" class="auth-tab-btn" id="btnAuthTabSignUp" onclick="switchTab('signup')">
+            <i class="fa-solid fa-user-plus"></i> Create Account
+          </button>
+        </div>
+
+        <!-- Notification Banner inside Auth -->
+        <div id="authAlertBanner" style="display: none; padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.825rem; font-weight: 500; margin-bottom: 1.25rem;"></div>
+
+        <!-- 1. SIGN IN FORM -->
+        <form id="formSignIn" onsubmit="handleSignIn(event)">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="signinEmail">Student Email</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-envelope auth-input-icon"></i>
+              <input type="email" id="signinEmail" class="auth-input" value="alex@study.io" placeholder="alex@study.io" required>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label class="form-label" for="signinPassword">Password</label>
+              <a href="#" onclick="alert('Password reset link sent to your registered email!'); return false;" style="font-size: 0.75rem; color: var(--primary); text-decoration: none; font-weight: 600;">Forgot Password?</a>
+            </div>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-lock auth-input-icon"></i>
+              <input type="password" id="signinPassword" class="auth-input" value="password123" placeholder="••••••••" required>
+              <button type="button" class="auth-password-toggle" onclick="togglePasswordVisibility('signinPassword', this)">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.825rem; color: var(--text-secondary); cursor: pointer;">
+              <input type="checkbox" id="signinRemember" checked style="accent-color: var(--primary);"> Remember me
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btnSignInSubmit" style="width: 100%; padding: 0.8rem; font-size: 0.95rem;">
+            <span>Sign In to Study Planner</span> <i class="fa-solid fa-arrow-right"></i>
+          </button>
+
+          <div class="auth-divider">
+            <span>or instant test</span>
+          </div>
+
+          <!-- One-Click Instant Demo Login Button -->
+          <button type="button" class="btn-demo-login" id="btnQuickDemoLogin" onclick="handleDemoLogin()">
+            <i class="fa-solid fa-bolt"></i> 1-Click Demo Student Sign In
+          </button>
+
+          <button type="button" class="btn-google" style="margin-top: 0.65rem;" onclick="handleGoogleLogin()">
+            <i class="fa-brands fa-google" style="color: #ea4335;"></i> Continue with Google
+          </button>
+        </form>
+
+        <!-- 2. SIGN UP / CREATE ACCOUNT FORM -->
+        <form id="formSignUp" style="display: none;" onsubmit="handleSignUp(event)">
+          <div class="form-group" style="margin-bottom: 0.85rem;">
+            <label class="form-label" for="signupName">Full Name</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-user auth-input-icon"></i>
+              <input type="text" id="signupName" class="auth-input" placeholder="Alex Chen" required>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.85rem;">
+            <label class="form-label" for="signupEmail">Email Address</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-envelope auth-input-icon"></i>
+              <input type="email" id="signupEmail" class="auth-input" placeholder="alex@study.io" required>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.85rem;">
+            <label class="form-label" for="signupGoal">Current Exam / Academic Target</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-bullseye auth-input-icon"></i>
+              <select id="signupGoal" class="auth-input" style="padding-left: 2.6rem;">
+                <option value="University Semester Finals & Midterms">University Semester Finals & Midterms</option>
+                <option value="Medical School / MCAT Prep">Medical School / MCAT Prep</option>
+                <option value="Engineering & Computer Science Finals">Engineering & Computer Science Finals</option>
+                <option value="High School Board / AP Exams">High School Board / AP Exams</option>
+                <option value="Law School / Bar / LSAT">Law School / Bar / LSAT</option>
+                <option value="General Professional Certification">General Professional Certification</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="signupPassword">Create Password</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-lock auth-input-icon"></i>
+              <input type="password" id="signupPassword" class="auth-input" placeholder="At least 6 characters" minlength="6" oninput="checkStrength(this.value)" required>
+              <button type="button" class="auth-password-toggle" onclick="togglePasswordVisibility('signupPassword', this)">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+            <!-- Password Strength Bar -->
+            <div class="password-strength-container">
+              <div class="strength-bar" id="strengthBar1"></div>
+              <div class="strength-bar" id="strengthBar2"></div>
+              <div class="strength-bar" id="strengthBar3"></div>
+            </div>
+            <span id="strengthText" style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 0.2rem;">Strength: min 6 chars</span>
+          </div>
+
+          <button type="submit" class="btn btn-accent" id="btnSignUpSubmit" style="width: 100%; padding: 0.8rem; font-size: 0.95rem;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Create Account & Launch Planner
+          </button>
+
+          <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 1rem;">
+            By signing up, your study schedules and topics are saved securely on your device.
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CINEMATIC POST-LOGIN ANIMATION OVERLAY ==================== -->
+  <div id="loginSuccessOverlay" class="login-success-overlay">
+    <div class="success-portal-container">
+      <!-- Orbiting Rings & Glow Sphere -->
+      <div class="orbit-system">
+        <div class="orbit-ring orbit-ring-1"></div>
+        <div class="orbit-ring orbit-ring-2"></div>
+        <div class="success-sphere">
+          <i class="fa-solid fa-check"></i>
+        </div>
+      </div>
+
+      <!-- Welcome Messaging -->
+      <h2 class="login-success-title" id="loginSuccessHeading">Welcome Back!</h2>
+      <p class="login-success-subtitle" id="loginSuccessMessage">
+        Calibrating your exam dates, daily timetable, and topic progress...
+      </p>
+
+      <!-- Smooth Progress Loader Bar -->
+      <div class="login-loader-container">
+        <div class="login-loader-bar" id="loginLoaderBar"></div>
+      </div>
+      <div class="login-loader-status" id="loginLoaderStatus">Synchronizing study sessions (100%)...</div>
+    </div>
+  </div>
+
+  <!-- Interactive Logic for login.html -->
+  <script>
+    const STORAGE_KEY = 'smart_study_planner_state_v1';
+
+    function switchTab(tab) {
+      const formSignIn = document.getElementById('formSignIn');
+      const formSignUp = document.getElementById('formSignUp');
+      const btnTabSignIn = document.getElementById('btnAuthTabSignIn');
+      const btnTabSignUp = document.getElementById('btnAuthTabSignUp');
+      const alertBanner = document.getElementById('authAlertBanner');
+
+      if (alertBanner) alertBanner.style.display = 'none';
+
+      if (tab === 'signin') {
+        formSignIn.style.display = 'block';
+        formSignUp.style.display = 'none';
+        btnTabSignIn.classList.add('active');
+        btnTabSignUp.classList.remove('active');
+      } else {
+        formSignIn.style.display = 'none';
+        formSignUp.style.display = 'block';
+        btnTabSignIn.classList.remove('active');
+        btnTabSignUp.classList.add('active');
+      }
+    }
+
+    function togglePasswordVisibility(inputId, btnEl) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      const icon = btnEl.querySelector('i');
+      if (icon) {
+        icon.className = isPassword ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+      }
+    }
+
+    function checkStrength(password) {
+      const bar1 = document.getElementById('strengthBar1');
+      const bar2 = document.getElementById('strengthBar2');
+      const bar3 = document.getElementById('strengthBar3');
+      const text = document.getElementById('strengthText');
+
+      bar1.style.background = 'var(--border-light)';
+      bar2.style.background = 'var(--border-light)';
+      bar3.style.background = 'var(--border-light)';
+
+      if (!password) {
+        text.textContent = 'Strength: min 6 chars';
+        text.style.color = 'var(--text-muted)';
+        return;
+      }
+
+      let score = 0;
+      if (password.length >= 6) score++;
+      if (password.length >= 8 && /[0-9]/.test(password)) score++;
+      if (password.length >= 10 && /[A-Z]/.test(password) && /[^A-Za-z0-9]/.test(password)) score++;
+
+      if (score === 1) {
+        bar1.style.background = '#ef4444';
+        text.textContent = 'Weak password';
+        text.style.color = '#ef4444';
+      } else if (score === 2) {
+        bar1.style.background = '#f59e0b';
+        bar2.style.background = '#f59e0b';
+        text.textContent = 'Good password';
+        text.style.color = '#f59e0b';
+      } else {
+        bar1.style.background = '#10b981';
+        bar2.style.background = '#10b981';
+        bar3.style.background = '#10b981';
+        text.textContent = 'Strong password 💪';
+        text.style.color = '#10b981';
+      }
+    }
+
+    function showAlert(msg, isError = true) {
+      const b = document.getElementById('authAlertBanner');
+      b.style.display = 'block';
+      b.style.background = isError ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)';
+      b.style.border = isError ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)';
+      b.style.color = isError ? '#dc2626' : '#059669';
+      b.innerHTML = (isError ? '<i class="fa-solid fa-circle-exclamation"></i> ' : '<i class="fa-solid fa-circle-check"></i> ') + msg;
+    }
+
+    function playAudioChime() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+        notes.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.08);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + i * 0.08);
+          osc.stop(ctx.currentTime + i * 0.08 + 0.35);
+        });
+      } catch (e) {}
+    }
+
+    function triggerPostLoginAnimation(user) {
+      const overlay = document.getElementById('loginSuccessOverlay');
+      const heading = document.getElementById('loginSuccessHeading');
+      const message = document.getElementById('loginSuccessMessage');
+      const loaderBar = document.getElementById('loginLoaderBar');
+      const loaderStatus = document.getElementById('loginLoaderStatus');
+
+      playAudioChime();
+
+      heading.textContent = `Welcome, ${user.name}! 🎓`;
+      message.textContent = `Preparing your personalized study workspace for ${user.targetExam || 'upcoming exams'}...`;
+      loaderBar.style.width = '0%';
+      loaderStatus.textContent = 'Verifying student credentials...';
+
+      overlay.classList.add('active');
+
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+      }
+
+      setTimeout(() => {
+        loaderBar.style.width = '40%';
+        loaderStatus.textContent = 'Loading course subjects & chapters...';
+      }, 300);
+
+      setTimeout(() => {
+        loaderBar.style.width = '80%';
+        loaderStatus.textContent = 'Calibrating daily timetables & revision buffers...';
+      }, 750);
+
+      setTimeout(() => {
+        loaderBar.style.width = '100%';
+        loaderStatus.textContent = '✨ Setup complete! Launching study dashboard...';
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
+        }
+      }, 1250);
+
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+          // Save currentUser to localStorage so index.html loads with this account
+          try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            const state = raw ? JSON.parse(raw) : {};
+            state.currentUser = user;
+            if (!state.users) state.users = [];
+            if (!state.users.some(u => u.email === user.email)) {
+              state.users.push(user);
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            sessionStorage.setItem('study_logged_in', 'true');
+          } catch (e) {}
+
+          // Smoothly redirect to index.html
+          window.location.href = 'index.html';
+        }, 350);
+      }, 1750);
+    }
+
+    function handleSignIn(e) {
+      e.preventDefault();
+      const email = document.getElementById('signinEmail').value.trim();
+      const password = document.getElementById('signinPassword').value;
+
+      let user = null;
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const state = JSON.parse(raw);
+          if (state.users) {
+            user = state.users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+          }
+        }
+      } catch (e) {}
+
+      if (!user && email.toLowerCase() === 'alex@study.io' && (password === 'password123' || password === '••••••••')) {
+        user = {
+          id: 'user_alex',
+          name: 'Alex Chen',
+          email: 'alex@study.io',
+          targetExam: 'University Semester Finals & Midterms',
+          avatar: 'AC'
+        };
+      }
+
+      if (user) {
+        triggerPostLoginAnimation(user);
+      } else {
+        showAlert('Invalid email or password. You can also use the 1-Click Demo Sign In button below!');
+      }
+    }
+
+    function handleSignUp(e) {
+      e.preventDefault();
+      const name = document.getElementById('signupName').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const targetExam = document.getElementById('signupGoal').value;
+
+      if (!name || !email || !password) {
+        showAlert('Please fill in all required fields.');
+        return;
+      }
+
+      const user = {
+        id: 'user_' + Date.now(),
+        name,
+        email,
+        password,
+        targetExam,
+        avatar: name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
+      };
+
+      triggerPostLoginAnimation(user);
+    }
+
+    function handleDemoLogin() {
+      const demoUser = {
+        id: 'user_alex',
+        name: 'Alex Chen',
+        email: 'alex@study.io',
+        targetExam: 'University Semester Finals & Midterms',
+        avatar: 'AC'
+      };
+      triggerPostLoginAnimation(demoUser);
+    }
+
+    function handleGoogleLogin() {
+      const googleUser = {
+        id: 'user_google_' + Date.now(),
+        name: 'Alex Chen (Google)',
+        email: 'alex.chen.student@gmail.com',
+        targetExam: 'University Semester Finals',
+        avatar: 'G'
+      };
+      triggerPostLoginAnimation(googleUser);
+    }
+  </script>
+</body>
+</html>
